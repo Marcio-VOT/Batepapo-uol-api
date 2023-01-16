@@ -1,5 +1,5 @@
 import express from "express";
-import { MongoClient, ObjectId } from "mongodb";
+import { MongoClient } from "mongodb";
 import dotenv from "dotenv";
 import cors from "cors";
 import joi from "joi";
@@ -11,15 +11,15 @@ app.use(cors());
 app.use(express.json());
 
 const mongoClient = new MongoClient(process.env.DATABASE_URL);
-let db;
+let db
 
 try {
 await mongoClient.connect();
+db = mongoClient.db();
 } catch (err) {
 console.log("Erro no mongo.conect", err.message);
 }
 
-db = mongoClient.db();
 const participantsColection = db.collection("participants");
 const messagesColection = db.collection("messages");
 const statusColection = db.collection("status");
