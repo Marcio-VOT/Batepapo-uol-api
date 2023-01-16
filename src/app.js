@@ -3,8 +3,6 @@ import { MongoClient, ObjectId } from "mongodb";
 import dotenv from "dotenv";
 import cors from "cors";
 import joi from "joi";
-import bcrypt from "bcryptjs";
-import { v4 as uuidV4, validate } from 'uuid';
 import dayjs from "dayjs";
 
 const app = express();
@@ -22,7 +20,6 @@ console.log("Erro no mongo.conect", err.message);
 }
 
 db = mongoClient.db();
-const defaultColection = db.collection("test");
 const participantsColection = db.collection("participants");
 const messagesColection = db.collection("messages");
 const statusColection = db.collection("status");
