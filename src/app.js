@@ -20,9 +20,8 @@ db = mongoClient.db();
 console.log("Erro no mongo.conect", err.message);
 }
 
-const participantsColection = db.collection("participants");
-const messagesColection = db.collection("messages");
-const statusColection = db.collection("status");
+//const participantsColection = db.collection("participants");
+//const messagesColection = db.collection("messages");
 
 setInterval(afkRemover, 15000);
 
@@ -37,11 +36,11 @@ app.post('/participants', async (req,res)=>{
         if(validation.error){
             return res.sendStatus(422);
         }
-        const usedName = await participantsColection.findOne({name});
+        const usedName = await db.collection("participants").findOne({name});
         if(usedName != null){
             return res.status(422).send("babalu")}
-        await participantsColection.insertOne({name, lastStatus : Date.now()});
-        messagesColection.insertOne({from:name, to:'Todos', text: 'entra na sala...', type: 'status', time: dayjs().format('HH:mm:ss') })
+        await db.collection("participants").insertOne({name, lastStatus : Date.now()});
+        db.collection("messages").insertOne({from:name, to:'Todos', text: 'entra na sala...', type: 'status', time: dayjs().format('HH:mm:ss') })
         res.sendStatus(201);
     } catch (error) {
         res.sendStatus(error)
@@ -50,7 +49,7 @@ app.post('/participants', async (req,res)=>{
 
 app.get('/participants', async (req,res)=>{
     try {
-        const process = await participantsColection.find().toArray();
+        const process = await db.collection("participants").find().toArray();
         res.send(process);
     } catch (error) {
         
@@ -67,11 +66,11 @@ app.post('/messages', async (req, res)=>{
     })
     try {   
         const validation = schema.validate({to, text, type});
-        const userExist = await participantsColection.findOne({name:user},{name:1, _id:0});
+        const userExist = await db.collection("participants").findOne({name:user},{name:1, _id:0});
         if(!userExist || validation.error){
             return res.sendStatus(422)
         }
-        await messagesColection.insertOne({ from: user, to, text, type, time: dayjs().format('HH:mm:ss')});
+        await db.collection("messages").insertOne({ from: user, to, text, type, time: dayjs().format('HH:mm:ss')});
 
         res.sendStatus(201);
     } catch (error) {
@@ -85,8 +84,8 @@ app.get('/messages/:limit?', async (req, res)=>{
     const limit = req.params.limit  
     
     try {   
-        //let temp = await messagesColection.insertOne({ from: user, to, text, type, time: dayjs().format('HH:mm:ss')});
-        let messagesList = await messagesColection.find({}).toArray();
+        //let temp = await db.collection("messages").insertOne({ from: user, to, text, type, time: dayjs().format('HH:mm:ss')});
+        let messagesList = await db.collection("messages").find({}).toArray();
 
         messagesList = messagesList.filter((msg)=> (msg.from === user || msg.to === user || msg.type === "message" || msg.type === "status"))
         if(limit && limit >= 0){
@@ -102,7 +101,7 @@ app.post('/status', async (req, res)=>{
     const user = req.headers.user;
 
     try {
-        const userUpdate = (await participantsColection.updateOne({name:user}, {$set: {lastStatus: Date.now()}})).matchedCount;
+        const userUpdate = (await db.collection("participants").updateOne({name:user}, {$set: {lastStatus: Date.now()}})).matchedCount;
         if(userUpdate === 0){
             return res.sendStatus(404);
         }
@@ -113,10 +112,10 @@ app.post('/status', async (req, res)=>{
 })
 
 async function afkRemover() {
-    const afkUsers = await participantsColection.find({lastStatus : {$lt: Date.now()-10000}}, {_id: 0, name: 1}).toArray();
+    const afkUsers = await db.collection("participants").find({lastStatus : {$lt: Date.now()-10000}}, {_id: 0, name: 1}).toArray();
     afkUsers.map(({name})=>{
-        participantsColection.deleteOne({name});
-        messagesColection.insertOne({from:name, to:'Todos', text: 'sai da sala...', type: 'status', time: dayjs().format('HH:mm:ss') })
+        db.collection("participants").deleteOne({name});
+        db.collection("messages").insertOne({from:name, to:'Todos', text: 'sai da sala...', type: 'status', time: dayjs().format('HH:mm:ss') })
     })
 }
  
