@@ -92,7 +92,9 @@ app.get('/messages/:limit?', async (req, res)=>{
         let messagesList = await messagesColection.find({}).toArray();
 
         messagesList = messagesList.filter((msg)=> (msg.from === user || msg.to === user || msg.type === "message" || msg.type === "status"))
-        limit && res.send(messagesList.slice(-(limit)));
+        if(limit && limit >= 0){
+            return res.send(messagesList.slice(-(limit)));
+        }
         res.send(messagesList);
     } catch (error) {
         
@@ -104,7 +106,9 @@ app.post('/status', async (req, res)=>{
 
     try {
         const userUpdate = (await participantsColection.updateOne({name:user}, {$set: {lastStatus: Date.now()}})).matchedCount;
-        userUpdate === 0 && res.sendStatus(404);
+        if(userUpdate === 0){
+            return res.sendStatus(404);
+        }
         res.sendStatus(200);
     } catch (error) {
         
