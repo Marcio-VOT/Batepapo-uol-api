@@ -86,10 +86,10 @@ app.post('/messages', async (req, res)=>{
     }
 })
 
-app.get('/messages/:limit?', async (req, res)=>{
+app.get('/messages', async (req, res)=>{
     const { to, text, type} = req.body;
     const user = req.headers.user;
-    let limit = req.params.limit;
+    let limit = req.query.limit;
 
     const schema = joi.object({
         limit: joi.number().positive().min(1).required()
@@ -104,7 +104,6 @@ app.get('/messages/:limit?', async (req, res)=>{
         
         if(limit){
             limit = Number(limit);
-            
             const verification = schema.validate({limit});
             console.log(verification.error)
             if(verification.error){
