@@ -40,10 +40,14 @@ app.post('/participants', async (req,res)=>{
         if(validation.error){
             return res.sendStatus(422);
         }
-        const usedName = await db.collection("participants").findOne({name});
-        if(usedName != null){
-            return res.status(409)}
+        const usedName = await db.collection("participants").findOne({name}, {name:1, _id:0, lastStatus:0});
+        console.log(usedName)
+        if(usedName){
+            return res.sendStatus(409);
+        }
+        
         await db.collection("participants").insertOne({name, lastStatus : Date.now()});
+
         db.collection("messages").insertOne({from:name, to:'Todos', text: 'entra na sala...', type: 'status', time: dayjs().format('HH:mm:ss') })
         res.sendStatus(201);
     } catch (error) {
@@ -101,7 +105,7 @@ app.get('/messages/:limit?', async (req, res)=>{
         if(verification.error){
             return res.sendStatus(422);
         }else if(limit){
-        return res.send(messagesList.slice(-(limit)));
+        return res.send(messagesList.slice(-limit));
         }
         res.send(messagesList);
     } catch (error) {
