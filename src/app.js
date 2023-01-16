@@ -89,10 +89,10 @@ app.post('/messages', async (req, res)=>{
 app.get('/messages/:limit?', async (req, res)=>{
     const { to, text, type} = req.body;
     const user = req.headers.user;
-    const limit = req.params.limit  
+    let limit = req.params.limit;
 
     const schema = joi.object({
-        limit: joi.number().positive().min(1)
+        limit: joi.number().positive().min(1).required()
     })
     
     try {   
@@ -100,13 +100,20 @@ app.get('/messages/:limit?', async (req, res)=>{
         let messagesList = await db.collection("messages").find({}).toArray();
 
         messagesList = messagesList.filter((msg)=> (msg.from === user || msg.to === user || msg.type === "message" || msg.type === "status"))
-        const verification = schema.validate({limit});
         
-        if(verification.error){
-            return res.sendStatus(422);
-        }else if(limit){
-        return res.send(messagesList.slice(-limit));
+        
+        if(limit){
+            limit = Number(limit);
+            
+            const verification = schema.validate({limit});
+            console.log(verification.error)
+            if(verification.error){
+                return res.sendStatus(422);
+            }else {
+                return res.send(messagesList.slice(-limit));
+            }
         }
+        console.log(limit)
         res.send(messagesList);
     } catch (error) {
         
