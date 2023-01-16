@@ -78,7 +78,7 @@ app.post('/messages', async (req, res)=>{
         if(!userExist || validation.error){
             return res.sendStatus(422)
         }
-        await db.collection("messages").insertOne({ from: user, to, text, type, time: dayjs().format('HH:mm:ss')});
+        await db.collection("messages").insertOne({ to, text, type, from: user, time: dayjs().format('HH:mm:ss')});
 
         res.sendStatus(201);
     } catch (error) {
@@ -87,7 +87,6 @@ app.post('/messages', async (req, res)=>{
 })
 
 app.get('/messages', async (req, res)=>{
-    const { to, text, type} = req.body;
     const user = req.headers.user;
     let limit = req.query.limit;
 
@@ -95,12 +94,10 @@ app.get('/messages', async (req, res)=>{
         limit: joi.number().positive().min(1).required()
     })
     
-    try {   
-        //let temp = await db.collection("messages").insertOne({ from: user, to, text, type, time: dayjs().format('HH:mm:ss')});
+    try {  
         let messagesList = await db.collection("messages").find({}).toArray();
-
-        messagesList = messagesList.filter((msg)=> (msg.from === user || msg.to === user || msg.type === "message" || msg.type === "status"))
-        
+        console.log(messagesList)
+        messagesList = messagesList.filter((msg)=> (msg.from === user || msg.to === user || msg.to === "Todos" || msg.type === "message" || msg.type === "status"))
         
         if(limit){
             limit = Number(limit);
