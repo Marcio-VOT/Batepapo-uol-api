@@ -4,9 +4,11 @@ import dotenv from "dotenv";
 import cors from "cors";
 import joi from "joi";
 import dayjs from "dayjs";
+
 dotenv.config();
 
-const port = 5000;
+const PORT = 5000;
+
 const mongoClient = new MongoClient(process.env.DATABASE_URL);
 let db
 
@@ -122,4 +124,4 @@ async function afkRemover() {
     })
 }
  
-app.listen(port, () => console.log(`Server running in port: ${port}`));
+app.listen(PORT, () => console.log(`Server running in port: ${PORT}`));
