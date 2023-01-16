@@ -97,7 +97,7 @@ app.get('/messages', async (req, res)=>{
     try {  
         let messagesList = await db.collection("messages").find({}).toArray();
         console.log(messagesList)
-        messagesList = messagesList.filter((msg)=> (msg.from === user || msg.to === user || msg.to === "Todos" || msg.type === "message" || msg.type === "status"))
+        messagesList = messagesList.filter((msg)=> (msg.from === user || msg.to === user || msg.to === "Todos" || msg.type === "message" || msg.type === "status")).reverse()
         
         if(limit){
             limit = Number(limit);
@@ -106,7 +106,7 @@ app.get('/messages', async (req, res)=>{
             if(verification.error){
                 return res.sendStatus(422);
             }else {
-                return res.send(messagesList.slice(limit));
+                return res.send(messagesList.slice(0, limit));
             }
         }
         console.log(limit)
