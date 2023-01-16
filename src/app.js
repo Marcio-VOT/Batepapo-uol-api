@@ -106,7 +106,7 @@ app.get('/messages', async (req, res)=>{
             if(verification.error){
                 return res.sendStatus(422);
             }else {
-                return res.send(messagesList.slice(-limit));
+                return res.send(messagesList.slice(limit));
             }
         }
         console.log(limit)
